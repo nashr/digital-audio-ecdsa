@@ -9,11 +9,11 @@ package util;
  */
 public class SHA1 {
 
-	private static int H0 = 0x67452301;
-	private static int H1 = 0xEFCDAB89;
-	private static int H2 = 0x98BADCFE;
-	private static int H3 = 0x10325476;
-	private static int H4 = 0xC3D2E1F0;
+	private static int H0 = 0x3045ae6f;
+	private static int H1 = 0xc8422f64;
+	private static int H2 = 0xed579528;
+	private static int H3 = 0xd38120ea;
+	private static int H4 = 0xe12196d5;
 	private static int K0 = 0x5A827999;
 	private static int K1 = 0x6ED9EBA1;
 	private static int K2 = 0x8F1BBCDC;
@@ -86,6 +86,7 @@ public class SHA1 {
 	
 	private static String hash(String message) {
 		String retval = "";
+		int h0 = H0, h1 = H1, h2 = H2, h3 = H3, h4 = H4;
 		for (int i = 0; i < message.length(); i += 512) {
 			// message schedule
 			int[] word = new int[80];
@@ -95,7 +96,7 @@ public class SHA1 {
 			}
 			
 			// looping
-			int a = H0, b = H1, c = H2, d = H3, e = H4;
+			int a = h0, b = h1, c = h2, d = h3, e = h4;
 			for (int j = 0; j < 80; j++) {
 				int f = getSHAFunction(b, c, d, j), k = getConstantK(j);
 				int t = e;
@@ -106,18 +107,21 @@ public class SHA1 {
 				a = rotateIntLeft(a, 5) + f + t + k + word[j];
 			}
 			
-			// append output
-			retval += Integer.toHexString(a);
-			retval += Integer.toHexString(b);
-			retval += Integer.toHexString(c);
-			retval += Integer.toHexString(d);
-			retval += Integer.toHexString(e);
+			// append result so far
+			h0 += a; h1 += b; h2 += c; h3 += d; h4 += e;
 		}
+		
+		// append final result
+		retval += String.format("%8s", Integer.toHexString(h0)).replace(' ', '0');
+		retval += String.format("%8s", Integer.toHexString(h1)).replace(' ', '0');
+		retval += String.format("%8s", Integer.toHexString(h2)).replace(' ', '0');
+		retval += String.format("%8s", Integer.toHexString(h3)).replace(' ', '0');
+		retval += String.format("%8s", Integer.toHexString(h4)).replace(' ', '0');
 		
 		return retval;
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(SHA1.getHash("abcdefghijklmnopqrstuvwxyz"));
+		System.out.println(SHA1.getHash("The quick brown fox jumps over the lazy dog"));
 	}
 }

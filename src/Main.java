@@ -1,5 +1,11 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -10,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import util.ECDSA;
 
 /**
  * GUI and main program
@@ -42,6 +50,8 @@ public class Main {
 	private static JButton signButton;
 	private static JButton checkButton;
 
+	private static byte[] message;
+	
 	public static Main getInstance() {
 		instance = new Main();
 		prepareGUI();
@@ -75,8 +85,14 @@ public class Main {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				//TODO
 				if (inputChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 					inputField.setText(inputChooser.getSelectedFile().getAbsolutePath());
+					try {
+						message = Files.readAllBytes(Paths.get(inputChooser.getSelectedFile().getAbsolutePath()));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		});
@@ -108,7 +124,43 @@ public class Main {
 		
 		// form
 		signButton = new JButton("Sign");
+		signButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				long start = System.currentTimeMillis();
+				String result = ECDSA.sign(message, new BigInteger("356467859094213856356"));
+				
+				byte[] resultByte = result.getBytes();
+				byte[] output = new byte[message.length+resultByte.length];
+				for (int i = 0; i < message.length+resultByte.length; i++) {
+					if (i < message.length) output[i] = message[i];
+					else output[i] = resultByte[i-message.length];
+				}
+				
+				try {
+					FileOutputStream fos = new FileOutputStream("res/result/test.mp3");
+					fos.write(output);
+					fos.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				System.out.println((System.currentTimeMillis() - start) + " ms");
+			}
+		});
+
 		checkButton = new JButton("Check");
+		checkButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		// position
 		actionLayout.setHorizontalGroup(actionLayout.createSequentialGroup()

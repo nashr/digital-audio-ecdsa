@@ -3,6 +3,8 @@
  */
 package util;
 
+import java.math.BigInteger;
+
 /**
  * @author nashir
  *
@@ -19,29 +21,62 @@ public class SHA1 {
 	private static int K2 = 0x8F1BBCDC;
 	private static int K3 = 0xCA62C1D6;
 	
-	public static String getHash(String message) {
-		message = paddingMessage(message);
-		message = hash(message);
-		return message;
+//	public static String getHash(String message) {
+//		message = paddingMessage(message);
+//		message = hash(message);
+//		return message;
+//	}
+	
+	public static BigInteger getHashBigInteger(byte[] message) {
+		int[] m = paddingMessage(message);
+		String h = hash(m);
+		return new BigInteger(h, 16);
 	}
 	
-	private static String paddingMessage(String message) {
-		int K = 8*message.length();
-		
-		byte[] m = message.getBytes();
-		String s = "";
-		for (byte b: m) {
-			s += String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+	private static int[] paddingMessage(byte[] message) {
+		long K = 8*message.length;
+		int length = (message.length+3)/4;
+		while (32*length % 512 != 448) {
+			length++;
 		}
 		
-		s += "1";
-		while (s.length() % 512 != 448) {
-			s += "0";
+		int[] retval = new int[length+2];
+		for (int i = 0; i < retval.length; i++) {
+			int val = 0;
+			if (4*i+4 <= message.length) {
+				for (int j = 4*i; j < 4*i+4; j++) {
+					val <<= 8;
+					val += message[j];
+				}
+			} else {
+				if (4*i < message.length) {
+					for (int j = 4*i; j < message.length; j++) {
+						val <<= 8;
+						val += message[j];
+					}
+					val <<= 8;
+					val += Math.pow(2, 7);
+					for (int j = 0; j < 4-message.length+4*i+1; j++) {
+						val <<= 8;
+						val += 0;
+					}
+				} else {
+					if (4*i == message.length) {
+						val <<= 8;
+						val += Math.pow(2, 7);
+					} else {
+						val <<= 8;
+						val += 0;
+					}
+				}
+			}
+			retval[i] = val;
 		}
 		
-		s += String.format("%64s", Integer.toBinaryString(K & 0xFFFFFFFF)).replace(' ', '0');
+		retval[retval.length-2] = (int) (K >> 32);
+		retval[retval.length-1] = (int) K;
 		
-		return s;
+		return retval;
 	}
 	
 	private static int rotateIntLeft(int b, int offset) {
@@ -84,14 +119,14 @@ public class SHA1 {
 		}
 	}
 	
-	private static String hash(String message) {
+	private static String hash(int[] message) {
 		String retval = "";
 		int h0 = H0, h1 = H1, h2 = H2, h3 = H3, h4 = H4;
-		for (int i = 0; i < message.length(); i += 512) {
+		for (int i = 0; i < message.length; i += 16) {
 			// message schedule
 			int[] word = new int[80];
 			for (int j = 0; j < 80; j++) {
-				if (j < 16) word[j] = NumberFormatter.parseBinaryToInt(message.substring(32*j, 32*(j+1)));
+				if (j < 16) word[j] = message[i+j];
 				else word[j] = rotateIntLeft(word[j-3] ^ word[j-8] ^ word[j-14] ^ word[j-16], 1);
 			}
 			
@@ -119,9 +154,5 @@ public class SHA1 {
 		retval += String.format("%8s", Integer.toHexString(h4)).replace(' ', '0');
 		
 		return retval;
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(SHA1.getHash("The quick brown fox jumps over the lazy dog"));
 	}
 }

@@ -6,34 +6,35 @@ public class EllipticCurve {
 
 	public static BigInteger NEUTRAL_VALUE = new BigInteger("-9999");
 	public static BigInteger P = new BigInteger("6277101735386680763835789423207666416083908700390324961279");
+	public static BigInteger R = new BigInteger("6277101735386680763835789423176059013767194773182842284081");
 	public static BigInteger A = new BigInteger("-3");
 	public static BigInteger B = new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16);
 	public static BigInteger GX = new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012", 16);
 	public static BigInteger GY = new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811", 16);
 	
-	private final BigInteger p = new BigInteger("6277101735386680763835789423207666416083908700390324961279");
-	private final BigInteger a = new BigInteger("-3");
-	private final BigInteger b = new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16);
-	private final BigInteger[] g = {new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012", 16), new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811", 16)};
+	private final static BigInteger p = new BigInteger("6277101735386680763835789423207666416083908700390324961279");
+	private final static BigInteger a = new BigInteger("-3");
+	private final static BigInteger b = new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16);
+	private final static BigInteger[] g = {new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012", 16), new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811", 16)};
 //	private ArrayList<BigInteger> GF; // Galois Field for current p
 
 	public EllipticCurve() {
 //		generateGaloisField();
 	}
 	
-	public BigInteger getA() {
+	public static BigInteger getA() {
 		return a;
 	}
 	
-	public BigInteger getB() {
+	public static BigInteger getB() {
 		return b;
 	}
 	
-	public BigInteger getP() {
+	public static BigInteger getP() {
 		return p;
 	}
 	
-	public BigInteger[] getBasePoint() {
+	public static BigInteger[] getBasePoint() {
 		return g;
 	}
 
@@ -54,7 +55,7 @@ public class EllipticCurve {
 //		return (P[0].compareTo(GF.get(P[1])) == 0);
 //	}
 	
-	public boolean isValidPoint(BigInteger[] P) {
+	public static boolean isValidPoint(BigInteger[] P) {
 		BigInteger LHS = P[1].pow(2).mod(p);
 		BigInteger RHS = P[0].pow(3).mod(p);
 		RHS = RHS.add(P[0].multiply(a)).mod(p);
@@ -75,7 +76,7 @@ public class EllipticCurve {
 //		else return false;*/
 //	}
 	
-	public boolean isValid(BigInteger Px) {
+	public static boolean isValid(BigInteger Px) {
 		BigInteger Py = Px.pow(3).mod(p);
 		Py = Py.add(Px.multiply(a)).mod(p);
 		Py = Py.add(b).mod(p);
@@ -96,7 +97,7 @@ public class EllipticCurve {
 //		return 0L;
 //	}
 	
-	public BigInteger getY(BigInteger Px) {
+	public static BigInteger getY(BigInteger Px) {
 		BigInteger Py = Px.pow(3).mod(p);
 		Py = Py.add(Px.multiply(a)).mod(p);
 		Py = Py.add(b).mod(p);
@@ -108,7 +109,7 @@ public class EllipticCurve {
 	 * calculate 2P
 	 * @return
 	 */
-	public BigInteger[] doublePoint(BigInteger[] P) {
+	public static BigInteger[] doublePoint(BigInteger[] P) {
 		BigInteger[] retval = new BigInteger[2];
 		
 		BigInteger lambda = P[0].pow(2).multiply(new BigInteger("3")).add(a).mod(p);
@@ -127,7 +128,7 @@ public class EllipticCurve {
 	 * @param Q
 	 * @return
 	 */
-	public BigInteger[] addPoint(BigInteger[] P, BigInteger[] Q) {		
+	public static BigInteger[] addPoint(BigInteger[] P, BigInteger[] Q) {		
 		BigInteger[] retval = new BigInteger[2];
 		
 		if (P[0].compareTo(NEUTRAL_VALUE) == 0) {
@@ -148,11 +149,11 @@ public class EllipticCurve {
 		return retval;
 	}
 	
-	public BigInteger[] getPublicKey(BigInteger privateKey) {
+	public static BigInteger[] getPublicKey(BigInteger privateKey) {
 		return multiplyPoint(privateKey, g);
 	}
 	
-	public BigInteger[] multiplyPoint(BigInteger k, BigInteger[] P) {
+	public static BigInteger[] multiplyPoint(BigInteger k, BigInteger[] P) {
 		BigInteger[] retval = new BigInteger[2];
 		retval[0] = NEUTRAL_VALUE;
 		retval[1] = NEUTRAL_VALUE;

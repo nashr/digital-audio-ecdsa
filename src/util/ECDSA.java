@@ -28,7 +28,41 @@ public class ECDSA {
 			s = Prime.getInverse(k, EllipticCurve.R).multiply(h.add(r.multiply(privateKey))).mod(EllipticCurve.R);
 		}
 		
-		return r.toString() + "-" + s.toString();
+		return "/" + r.toString() + "-" + s.toString();
+	}
+	
+	public static boolean verify(byte[] message, BigInteger[] publicKey) {
+		if (!EllipticCurve.isValidPoint(publicKey)) {
+			System.out.println("Invalid public key.");
+			return false;
+		}
+		
+		String signature = "";
+		int i = message.length - 1;
+		while ('/' != (char) message[i]) {
+			signature = (char) message[i] + signature;
+			i--;
+		}
+
+		String[] dsPoint = signature.split("-");
+		BigInteger[] ds = new BigInteger[2];
+		ds[0] = new BigInteger(dsPoint[0]);
+		ds[1] = new BigInteger(dsPoint[1]);
+		if (ds[0].compareTo(BigInteger.ZERO) < 1 || ds[0].compareTo(EllipticCurve.R) > -1) {
+			System.out.println("Wrong Sx.");
+			return false;
+		}
+		if (ds[1].compareTo(BigInteger.ZERO) < 1 || ds[1].compareTo(EllipticCurve.R) > -1) {
+			System.out.println("Wrong Sy.");
+			return false;
+		}
+
+		BigInteger h = SHA1.getHashBigInteger(message);
+		BigInteger w = Prime.getInverse(ds[1], EllipticCurve.R);
+		BigInteger u1 = h.multiply(w).mod(EllipticCurve.R);
+		BigInteger u2 = ds[0].multiply(w).mod(EllipticCurve.R);
+		BigInteger[] P = EllipticCurve.addPoint(EllipticCurve.getPublicKey(u1), EllipticCurve.multiplyPoint(u2, publicKey));
+		return P[0].mod(EllipticCurve.P).compareTo(P[0]) == 0;
 	}
 	
 	public static void main(String[] args) {

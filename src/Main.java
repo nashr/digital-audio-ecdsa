@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -32,7 +33,7 @@ public class Main {
 	private static Main instance;
 	
 	private static int MAINFRAME_WIDTH = 600;
-	private static int MAINFRAME_HEIGHT = 400;
+	private static int MAINFRAME_HEIGHT = 200;
 	
 	private static JFrame mainFrame;
 	private static GroupLayout mainLayout;
@@ -50,6 +51,11 @@ public class Main {
 	private static JButton signButton;
 	private static JButton checkButton;
 
+	private static BigInteger privateKey = new BigInteger("356467859094213856356");
+	private static BigInteger[] publicKey = {
+		new BigInteger("22099131251334973141172114393972221072376908089126675462"), 
+		new BigInteger("2119443052773016683092927806932150364083781283726775536192")
+	};
 	private static byte[] message;
 	
 	public static Main getInstance() {
@@ -85,7 +91,7 @@ public class Main {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//TODO
+				// TODO Auto-generated method stub
 				if (inputChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 					inputField.setText(inputChooser.getSelectedFile().getAbsolutePath());
 					try {
@@ -130,7 +136,7 @@ public class Main {
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
 				long start = System.currentTimeMillis();
-				String result = ECDSA.sign(message, new BigInteger("356467859094213856356"));
+				String result = ECDSA.sign(message, privateKey);
 				
 				byte[] resultByte = result.getBytes();
 				byte[] output = new byte[message.length+resultByte.length];
@@ -158,7 +164,9 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				
+				boolean result = ECDSA.verify(message, publicKey);
+				if (result) JOptionPane.showMessageDialog(null, "Valid audio file.");
+				else JOptionPane.showMessageDialog(null, "Invalid audio file.");
 			}
 		});
 		

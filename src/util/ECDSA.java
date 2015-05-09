@@ -28,7 +28,7 @@ public class ECDSA {
 			s = Prime.getInverse(k, EllipticCurve.R).multiply(h.add(r.multiply(privateKey))).mod(EllipticCurve.R);
 		}
 		
-		return "/" + r.toString() + "-" + s.toString();
+		return "/" + r.toString(16) + "-" + s.toString(16);
 	}
 	
 	public static boolean verify(byte[] message, BigInteger[] publicKey) {

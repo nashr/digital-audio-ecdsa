@@ -246,8 +246,8 @@ public class Main {
 				// TODO Auto-generated method stub
 				long start = System.currentTimeMillis();
 				publicKey = new BigInteger[2];
-				publicKey[0] = new BigInteger(publicXField.getText());
-				publicKey[1] = new BigInteger(publicYField.getText());
+				publicKey[0] = new BigInteger(publicXField.getText(), 16);
+				publicKey[1] = new BigInteger(publicYField.getText(), 16);
 				boolean result = ECDSA.verify(message, publicKey);
 				if (result) JOptionPane.showMessageDialog(null, "Valid audio file.");
 				else JOptionPane.showMessageDialog(null, "Invalid audio file.");

@@ -46,8 +46,8 @@ public class ECDSA {
 
 		String[] dsPoint = signature.split("-");
 		BigInteger[] ds = new BigInteger[2];
-		ds[0] = new BigInteger(dsPoint[0]);
-		ds[1] = new BigInteger(dsPoint[1]);
+		ds[0] = new BigInteger(dsPoint[0], 16);
+		ds[1] = new BigInteger(dsPoint[1], 16);
 		if (ds[0].compareTo(BigInteger.ZERO) < 1 || ds[0].compareTo(EllipticCurve.R) > -1) {
 			System.out.println("Wrong Sx.");
 			return false;

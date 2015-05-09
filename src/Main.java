@@ -249,9 +249,9 @@ public class Main {
 				publicKey[0] = new BigInteger(publicXField.getText());
 				publicKey[1] = new BigInteger(publicYField.getText());
 				boolean result = ECDSA.verify(message, publicKey);
+				System.out.println((System.currentTimeMillis() - start) + " ms");
 				if (result) JOptionPane.showMessageDialog(null, "Valid audio file.");
 				else JOptionPane.showMessageDialog(null, "Invalid audio file.");
-				System.out.println((System.currentTimeMillis() - start) + " ms");
 			}
 		});
 		

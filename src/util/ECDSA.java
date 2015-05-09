@@ -43,6 +43,11 @@ public class ECDSA {
 			signature = (char) message[i] + signature;
 			i--;
 		}
+		
+		byte[] oriMessage = new byte[i];
+		for (int j = 0; j < i; j++) {
+			oriMessage[j] = message[j];
+		}
 
 		String[] dsPoint = signature.split("-");
 		BigInteger[] ds = new BigInteger[2];
@@ -57,12 +62,12 @@ public class ECDSA {
 			return false;
 		}
 
-		BigInteger h = SHA1.getHashBigInteger(message);
+		BigInteger h = SHA1.getHashBigInteger(oriMessage);
 		BigInteger w = Prime.getInverse(ds[1], EllipticCurve.R);
 		BigInteger u1 = h.multiply(w).mod(EllipticCurve.R);
 		BigInteger u2 = ds[0].multiply(w).mod(EllipticCurve.R);
 		BigInteger[] P = EllipticCurve.addPoint(EllipticCurve.getPublicKey(u1), EllipticCurve.multiplyPoint(u2, publicKey));
-		return P[0].mod(EllipticCurve.P).compareTo(P[0]) == 0;
+		return P[0].mod(EllipticCurve.P).compareTo(ds[0]) == 0;
 	}
 	
 	public static void main(String[] args) {

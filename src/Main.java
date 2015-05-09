@@ -33,7 +33,7 @@ public class Main {
 	private static Main instance;
 	
 	private static int MAINFRAME_WIDTH = 600;
-	private static int MAINFRAME_HEIGHT = 200;
+	private static int MAINFRAME_HEIGHT = 300;
 	
 	private static JFrame mainFrame;
 	private static GroupLayout mainLayout;
@@ -47,15 +47,23 @@ public class Main {
 	private static JTextField inputField;
 	private static JButton inputButton;
 	private static JFileChooser inputChooser;
+	
+	private static JLabel privateLabel;
+	private static JTextField privateField;
+	private static JButton privateButton;
+	private static JFileChooser privateChooser;
+	
+	private static JLabel publicLabel;
+	private static JTextField publicXField;
+	private static JTextField publicYField;
+	private static JButton publicButton;
+	private static JFileChooser publicChooser;
 
 	private static JButton signButton;
 	private static JButton checkButton;
 
-	private static BigInteger privateKey = new BigInteger("356467859094213856356");
-	private static BigInteger[] publicKey = {
-		new BigInteger("22099131251334973141172114393972221072376908089126675462"), 
-		new BigInteger("2119443052773016683092927806932150364083781283726775536192")
-	};
+	private static BigInteger privateKey;
+	private static BigInteger[] publicKey;
 	private static byte[] message;
 	
 	public static Main getInstance() {
@@ -83,7 +91,7 @@ public class Main {
 		inputPanel.setLayout(inputLayout);
 		
 		// form
-		inputLabel = new JLabel("Input");
+		inputLabel = new JLabel("Audio");
 		inputField = new JTextField();
 		inputField.setEditable(false);
 		inputButton = new JButton("Browse Audio");
@@ -104,17 +112,86 @@ public class Main {
 		});
 		inputChooser = new JFileChooser("res/audio");
 		inputChooser.setAcceptAllFileFilterUsed(false);
-		inputChooser.setFileFilter(new FileNameExtensionFilter("Audio Files", "mp3", "wav"));
+		inputChooser.setFileFilter(new FileNameExtensionFilter("Audio Files", "mid", "mp3", "ogg", "wav", "wma"));
+		
+		privateLabel = new JLabel("Private Key");
+		privateField = new JTextField();
+		privateButton = new JButton("Browse Key");
+		privateButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (privateChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+					try {
+						byte[] privateKey = Files.readAllBytes(Paths.get(privateChooser.getSelectedFile().getAbsolutePath()));
+						privateField.setText(new String(privateKey));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		privateChooser = new JFileChooser("res/key");
+		privateChooser.setAcceptAllFileFilterUsed(false);
+		privateChooser.setFileFilter(new FileNameExtensionFilter("Private Keys", "pri"));
+		
+		publicLabel = new JLabel("Public Key");
+		publicXField = new JTextField();
+		publicYField = new JTextField();
+		publicButton = new JButton("Browse Key");
+		publicButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (publicChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+					try {
+						byte[] publicKey = Files.readAllBytes(Paths.get(publicChooser.getSelectedFile().getAbsolutePath()));
+						String[] publicKeyPoint = new String(publicKey).split(",");
+						publicXField.setText(publicKeyPoint[0]);
+						publicYField.setText(publicKeyPoint[1]);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		publicChooser = new JFileChooser("res/key");
+		publicChooser.setAcceptAllFileFilterUsed(false);
+		publicChooser.setFileFilter(new FileNameExtensionFilter("Public Keys", "pub"));
 		
 		// position
-		inputLayout.setHorizontalGroup(inputLayout.createSequentialGroup()
-			.addComponent(inputLabel)
-			.addComponent(inputField)
-			.addComponent(inputButton));
-		inputLayout.setVerticalGroup(inputLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-			.addComponent(inputLabel)
-			.addComponent(inputField)
-			.addComponent(inputButton));
+		inputLayout.setHorizontalGroup(inputLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+			.addGroup(inputLayout.createSequentialGroup()
+				.addComponent(inputLabel, 65, 65, 65)
+				.addComponent(inputField)
+				.addComponent(inputButton, 120, 120, 120))
+			.addGroup(inputLayout.createSequentialGroup()
+				.addComponent(privateLabel, 65, 65, 65)
+				.addComponent(privateField)
+				.addComponent(privateButton, 120, 120, 120))
+			.addGroup(inputLayout.createSequentialGroup()
+				.addComponent(publicLabel, 65, 65, 65)
+				.addComponent(publicXField)
+				.addComponent(publicButton, 120, 120, 120))
+			.addGroup(inputLayout.createSequentialGroup()
+				.addGap(77)
+				.addComponent(publicYField)
+				.addGap(126)));
+		inputLayout.setVerticalGroup(inputLayout.createSequentialGroup()
+			.addGroup(inputLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addComponent(inputLabel)
+				.addComponent(inputField)
+				.addComponent(inputButton))
+			.addGroup(inputLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addComponent(privateLabel)
+				.addComponent(privateField)
+				.addComponent(privateButton))
+			.addGroup(inputLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addComponent(publicLabel)
+				.addComponent(publicXField)
+				.addComponent(publicButton))
+			.addGroup(inputLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addComponent(publicYField)));
 	}
 
 	private static void prepareAction() {
@@ -136,6 +213,7 @@ public class Main {
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
 				long start = System.currentTimeMillis();
+				privateKey = new BigInteger(privateField.getText());
 				String result = ECDSA.sign(message, privateKey);
 				
 				byte[] resultByte = result.getBytes();
@@ -146,7 +224,9 @@ public class Main {
 				}
 				
 				try {
-					FileOutputStream fos = new FileOutputStream("res/result/test.mp3");
+					String ext = inputField.getText();
+					ext = ext.substring(ext.length()-3, ext.length());
+					FileOutputStream fos = new FileOutputStream("res/result/test." + ext);
 					fos.write(output);
 					fos.close();
 				} catch (FileNotFoundException e) {
@@ -164,9 +244,14 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				long start = System.currentTimeMillis();
+				publicKey = new BigInteger[2];
+				publicKey[0] = new BigInteger(publicXField.getText());
+				publicKey[1] = new BigInteger(publicYField.getText());
 				boolean result = ECDSA.verify(message, publicKey);
 				if (result) JOptionPane.showMessageDialog(null, "Valid audio file.");
 				else JOptionPane.showMessageDialog(null, "Invalid audio file.");
+				System.out.println((System.currentTimeMillis() - start) + " ms");
 			}
 		});
 		
